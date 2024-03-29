@@ -1,0 +1,128 @@
+#this is the start of the code, the bitmaps just load in the stimuli
+bitmaps
+ robot_1
+ robot_2
+ robot_3
+ robot_4
+ robot_5
+ robot_6
+ robot_7
+ robot_8
+ button
+ end_message
+ left 
+ right
+ next
+ stars_1
+ stars_2
+ stars_8
+ key_3
+ key_4
+ key_5
+ key_6
+ key_7
+ fake_button
+ robot_stars 
+ cogs
+
+sounds
+ robot_stars_sound
+ robot_windup
+
+#these are global variables that are set for the entirety of the task
+options
+ mouse on
+ fullscreen
+ resolution 1400 1000
+ background color E3E3E2
+
+#this is a table of all of the different POVs, the 1st column is the POV, the 2nd is the button bitmap, 
+#the 3rd and 4th are the coordinates for the clickable button, the 5th is the bitmap for when the button is clicked,
+#and the last is the sound. the 'fake_button' is too small and out of range to click. 
+table positions
+ robot_1 stars_1 25 -10 robot_stars robot_stars_sound
+ robot_2 stars_2 125 -25 robot_stars robot_stars_sound
+ robot_3 key_3 -85 -30 cogs robot_windup
+ robot_4 key_4 -60 -25 cogs robot_windup
+ robot_5 key_5 18 -30 cogs robot_windup
+ robot_6 key_6 120 -30 cogs robot_windup
+ robot_7 key_7 150 -20 cogs robot_windup
+ robot_8 stars_8 -60 -20 robot_stars robot_stars_sound
+
+task mytask
+ mouse show
+ #
+ #this is to call in the table values
+ table positions
+ #
+ #set up a variable to keep the experiment going until the space bar is clicked
+ set $end 0
+ #
+ #this variable defines which POV row will be called forward
+ set $position 1
+ #
+ #this while loop keeps going until the child clicks the x in the corner to end the experiment
+ while $end < 1 
+  #this begins the timer
+  timestamp start
+  #this calls forward the first POV at row 1 and at other rows as the loop repeats
+  tablerow $position
+  #
+  #this shows the image and button at the row in the $position variable
+  show bitmap @1
+  show bitmap left -550 350
+  show bitmap right 550 350
+  show bitmap @2 @3 @4
+  show bitmap next 500 -375
+  #
+  #this makes sure the key press is recorded in the data
+  #
+  readmouse l 4 999999999 range 2 5
+  #these if statements move up and down the rows of the table, depending on which key is pressed 
+  #(e.g. 4 is equal to the 4th bitmap that was shown in this while loop, which is the button)
+  if UNDER_MOUSE == 4
+    #meaning, if the button is clicked
+    clear 4
+    show bitmap @5 @3 @4
+    #this will show the animation and make the sound
+    sound @6
+    delay 2000
+    clear -1
+    save BLOCKNAME @1 $position RT STATUS
+    #this specifies which data to save, it will record the POV, the reaction time and the button that was clicked
+  fi
+  if UNDER_MOUSE == 3
+    #this means that the right arrow was pressed, the screen is cleared and it goes to the next position
+    clear screen
+    set $position expression $position-1
+    save BLOCKNAME @1 $position RT STATUS
+  fi
+  if UNDER_MOUSE == 2
+    #this means that the left arrow was pressed, the screen is cleared and it goes to the next position
+    clear screen
+    set $position expression $position+1
+    save BLOCKNAME @1 $position RT STATUS
+  fi
+  if UNDER_MOUSE == 5
+    #this means that the red x was pressed and the experiment ends
+    set $end expression $end+2
+    timestamp end 
+    set $play_time timestamp-diff start end
+    save BLOCKNAME @1 $position $play_time
+  fi
+  #this if statement cycles back to the end of the POV index if they go under image 1
+  if $position == 0
+    set $position expression $position +8
+  fi
+  #this if statement cycles back to the start of the POV index if they go past image 8
+  if $position == 9
+    set $position expression $position -8
+  fi
+ while-end
+ clear 1
+
+#this is the test block, it runs the child through the task once, and then shows an end message that encourages the parent to finish the rest of the study. 
+block testBlock
+ tasklist
+   mytask 1
+ end
