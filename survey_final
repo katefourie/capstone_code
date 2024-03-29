@@ -1,0 +1,97 @@
+#this records the condition that the participant has been assigned to, PsyToolKit automatically divides 
+#the participants up in a 5:4:4:4 ratio and assigns them a $psy-group, the below function just records this group 
+# for later data analysis
+l: record_condition
+t: set
+- $psy_group
+
+#then, this opens the training video. It is configured so that they can't continue until the time of the video is up
+l: training_video
+t: youtube
+o: mintime 62s hide
+q: First, please watch this video! <b>Please open it in full screen and make sure you watch the whole thing.</b> 
+- XC6nnaRHF0s
+
+#then, the training block begins
+l: training
+t: experiment
+q:
+- training_novel_toy
+
+#this is where randomisation happens. they have been given a random psy_group and this sends them to the corresponding 
+#condition introduction video
+j: if $psy_group = 1 then goto pedagogical_intro
+j: if $psy_group = 2 then goto naive_intro
+j: if $psy_group = 3 then goto guided_exploration_intro
+j: if $psy_group = 4 then goto baseline_intro
+
+#this is the introduction video for the first condition
+l: pedagogical_intro
+t: youtube
+o: mintime 47s hide
+q: First, you'll watch this video! <b>Please open it in full screen and make sure you watch the whole thing.</b> 
+- QC6nraR1F0s
+
+#this makes sure that they don't see all the videos, it skips to the toy task
+j: toy_task
+
+#this is the introduction video for the second condition
+l: naive_intro
+t: youtube
+o: mintime 45s hide
+q: First, you'll watch this video! <b>Please open it in full screen and make sure you watch the whole thing.</b> 
+- hO4jT7R7Eyc
+
+j: toy_task
+
+#this is the introduction video for the third condition
+l: guided_exploration_intro
+t: youtube
+o: mintime 49s hide
+q: First, you'll watch this video! <b>Please open it in full screen and make sure you watch the whole thing.</b> 
+- PIAgy2qGPyQ
+
+j: toy_task
+
+#this is the introduction video for the fourth condition
+l: baseline_intro
+t: youtube
+o: mintime 28s hide
+q: First, you'll watch this video! <b>Please open it in full screen and make sure you watch the whole thing.</b> 
+- 8DGJ4zJeaDQ
+
+#here is the embedded novel toy experiment
+l: toy_task
+t: experiment
+q:
+- novel_toy_task
+
+#below are the parent questions to see if they were involved during the task
+l: parent_question_1
+t: radio
+q: <b>Did you need to help your child with using the mouse or trackpad at any point during the study?</b><br> (Don't worry if you did, this is just helpful for us to keep track of).
+- Yes
+- No
+
+#this jumps to the third question if they responded 'No' to the above question
+l: jump1
+t: jump
+- if $parent_question_1 = 2 then goto parent_question_4
+
+l: parent_question_2
+t: textline
+q: <b>At what point did you help them?</b> (e.g. to click on the toy, to move the toy around, to end the survey)
+
+l: parent_question_3
+t: textline
+q: <b>Could you describe the type of instruction you gave your child?</b> 
+
+l: parent_question_4
+t: radio
+q: <b>Did your child watch the videos all the way through, in full screen?</b>
+- Yes, both in full screen and all the way through.
+- No, they watched it all the way through, but not in full screen.
+- No, they watched it in full screen, but not all the way through. 
+- No, they didn't watch them at all. 
+
+#the experiment will end after this and will go to a thank you screen
